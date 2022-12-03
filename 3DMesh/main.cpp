@@ -46,7 +46,7 @@ void display() {
 
 	draw_obj(vertices, normals, DinoOrder);
 
-	drawAxis();
+	//drawAxis();
 
 	glutSwapBuffers();
 }
@@ -58,15 +58,34 @@ void reshape(GLint w, GLint h) {
 	glViewport(0, 0, w, h);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(60.0, GLfloat(w) / GLfloat(h), 0.1, 5.0);
+	gluPerspective(60.0, GLfloat(w) / GLfloat(h), 0.01, 5.0);
 	glMatrixMode(GL_MODELVIEW);
 }
 
 void init() {
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_LIGHTING);
+	glShadeModel(GL_SMOOTH);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	load_obj("dino.obj", vertices, normals, DinoOrder);
+
+	// glPointLightSource
+	GLfloat diffuse0[] = { 1.0, 1.0, 1.0, 1.0 };
+	GLfloat ambient0[] = { 1.0, 1.0, 1.0, 1.0 };
+	GLfloat specular0[] = { 1.0, 1.0, 1.0, 1.0 };
+	GLfloat light0_pos[] = { 5.0, 5.0, 5.0, 1.0 };
+
+	glEnable(GL_LIGHT0);
+	glLightfv(GL_LIGHT0, GL_POSITION, light0_pos);
+	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient0);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse0);
+	glLightfv(GL_LIGHT0, GL_SPECULAR, specular0);
+
+	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.0);
+	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.01);
+	glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 0.0);
+	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
 }
 
 // Initializes GLUT, the display mode, and main window; registers callbacks;
@@ -125,6 +144,7 @@ void load_obj(const char* filename, std::vector<floatvec>& vertices, std::vector
 			t.push_back(a); t.push_back(b); t.push_back(c);
 			elements.push_back(t);
 
+			// compute normal
 			floatvec vec1 = { vertices[b][0] - vertices[a][0], vertices[b][1] - vertices[a][1] , vertices[b][2] - vertices[a][2] };
 			floatvec vec2 = { vertices[c][0] - vertices[a][0], vertices[c][1] - vertices[c][1] , vertices[c][2] - vertices[a][2] };
 
@@ -160,14 +180,23 @@ void load_obj(const char* filename, std::vector<floatvec>& vertices, std::vector
 }
 
 void draw_obj(std::vector<floatvec>& vertices, std::vector<floatvec>& normals, std::vector<std::vector<GLushort>>& triangles) {
-	glColor3f(1.0, 1.0, 1.0);
+	GLfloat ambient[] = { 0.2, 0.2, 0.2, 1.0 };
+	GLfloat diffuse[] = { 1.0, 0.8, 0.0, 1.0 };
+	GLfloat specular[] = { 1.0, 1.0, 1.0, 1.0 };
+	GLfloat shine = 100.0;
+
+	glMaterialfv(GL_FRONT, GL_AMBIENT, ambient);
+	glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
+	glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
+	glMaterialf(GL_FRONT, GL_SHININESS, shine);
+
 	for (int i = 0; i < triangles.size(); i++) {
 		GLushort v1 = triangles[i][0], v2 = triangles[i][1], v3 = triangles[i][2];
 		glNormal3fv(normals[i].data());
 		glBegin(GL_TRIANGLES);
-		glVertex3fv(vertices[v1].data());
-		glVertex3fv(vertices[v2].data());
-		glVertex3fv(vertices[v3].data());
+			glVertex3fv(vertices[v1].data());
+			glVertex3fv(vertices[v2].data());
+			glVertex3fv(vertices[v3].data());
 		glEnd();
 	}
 }
