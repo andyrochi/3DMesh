@@ -361,3 +361,17 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+!Dependencies/glew-2.1.0/bin/
+!Dependencies/glew-2.1.0/bin/Release/
+!Dependencies/glew-2.1.0/bin/Release/x64/
+!Dependencies/glew-2.1.0/bin/Release/Win32/
+!Dependencies/glew-2.1.0/lib/Release/
+!Dependencies/glew-2.1.0/lib/Release/x64/
+!Dependencies/glew-2.1.0/lib/Release/Win32/
+
+!Dependencies/freeglut/bin/
+!Dependencies/freeglut/bin/x64/
+!Dependencies/freeglut/bin/Win32/
+!Dependencies/freeglut/lib/x64/
+!Dependencies/freeglut/lib/Win32/
