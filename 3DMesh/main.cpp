@@ -6,11 +6,12 @@
 // Initialize camera
 Camera camera;
 
-std::vector<std::vector<GLfloat>> vertices;
+std::vector<floatvec> vertices;
+std::vector<floatvec> normals;
 std::vector<std::vector<GLushort>> DinoOrder;
 
-void load_obj(const char* filename, std::vector<std::vector<GLfloat>>& vertices, std::vector<std::vector<GLushort>>& elements);
-void draw_obj(std::vector<std::vector<GLfloat>>& vertices, std::vector<std::vector<GLushort>>& elements);
+void load_obj(const char* filename, std::vector<floatvec>& vertices, std::vector<floatvec>& normals, std::vector<std::vector<GLushort>>& elements);
+void draw_obj(std::vector<floatvec>& vertices, std::vector<floatvec>& normals, std::vector<std::vector<GLushort>>& elements);
 
 // Handles the keyboard event: the left and right arrows bend the elbow, the
 // up and down keys bend the shoulder.
@@ -43,7 +44,7 @@ void display() {
 		centerX, centerY, centerZ,
 		up[0], up[1], up[2]);
 
-	draw_obj(vertices, DinoOrder);
+	draw_obj(vertices, normals, DinoOrder);
 
 	drawAxis();
 
@@ -65,7 +66,7 @@ void init() {
 	glEnable(GL_DEPTH_TEST);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	load_obj("dino.obj", vertices, DinoOrder);
+	load_obj("dino.obj", vertices, normals, DinoOrder);
 }
 
 // Initializes GLUT, the display mode, and main window; registers callbacks;
@@ -84,7 +85,7 @@ int main(int argc, char** argv) {
 	glutMainLoop();
 }
 
-void load_obj(const char* filename, std::vector<std::vector<GLfloat>>& vertices, std::vector<std::vector<GLushort>>& elements)
+void load_obj(const char* filename, std::vector<floatvec>& vertices, std::vector<floatvec>& normals, std::vector<std::vector<GLushort>>& elements)
 {
 	std::ifstream in(filename, std::ios::in);
 	if (!in)
@@ -122,10 +123,18 @@ void load_obj(const char* filename, std::vector<std::vector<GLfloat>>& vertices,
 			std::vector<GLushort> t;
 
 			t.push_back(a); t.push_back(b); t.push_back(c);
-
 			elements.push_back(t);
+
+			floatvec vec1 = { vertices[b][0] - vertices[a][0], vertices[b][1] - vertices[a][1] , vertices[b][2] - vertices[a][2] };
+			floatvec vec2 = { vertices[c][0] - vertices[a][0], vertices[c][1] - vertices[c][1] , vertices[c][2] - vertices[a][2] };
+
+			floatvec normal = crossProduct(vec1, vec2);
+			normalize(normal);
+
+			normals.push_back(normal);
 		}
 		/* anything else is ignored */
+
 	}
 	
 	GLfloat xOffset = -(maxX + minX) / 2;
@@ -150,10 +159,11 @@ void load_obj(const char* filename, std::vector<std::vector<GLfloat>>& vertices,
 	}
 }
 
-void draw_obj(std::vector<std::vector<GLfloat>>& vertices, std::vector<std::vector<GLushort>>& elements) {
+void draw_obj(std::vector<floatvec>& vertices, std::vector<floatvec>& normals, std::vector<std::vector<GLushort>>& triangles) {
 	glColor3f(1.0, 1.0, 1.0);
-	for (auto& tri : elements) {
-		GLushort v1 = tri[0], v2 = tri[1], v3 = tri[2];
+	for (int i = 0; i < triangles.size(); i++) {
+		GLushort v1 = triangles[i][0], v2 = triangles[i][1], v3 = triangles[i][2];
+		glNormal3fv(normals[i].data());
 		glBegin(GL_TRIANGLES);
 		glVertex3fv(vertices[v1].data());
 		glVertex3fv(vertices[v2].data());
