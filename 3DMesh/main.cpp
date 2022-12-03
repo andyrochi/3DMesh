@@ -2,11 +2,6 @@
 // that you can rotate by pressing the arrow keys.
 #include "Camera.h"
 #include "Utils.h"
-#include <fstream>
-#include <vector>
-#include <string>
-#include <sstream>
-#include <iostream>
 
 // Initialize camera
 Camera camera;
@@ -99,7 +94,8 @@ void load_obj(const char* filename, std::vector<std::vector<GLfloat>>& vertices,
 	}
 
 	std::string line;
-	GLfloat maxVal = 0;
+	GLfloat maxX = 0, maxY = 0, maxZ = 0;
+	GLfloat minX = 0, minY = 0, minZ = 0;
 	while (std::getline(in, line))
 	{
 
@@ -110,10 +106,12 @@ void load_obj(const char* filename, std::vector<std::vector<GLfloat>>& vertices,
 			// x y z w
 			s >> v[0]; s >> v[1]; s >> v[2];
 			vertices.push_back(v);
-			for (GLfloat& vi : v) {
-				if (abs(vi) > maxVal)
-					maxVal = abs(vi);
-			}
+			maxX = std::max(maxX, v[0]);
+			minX = std::min(minX, v[0]);
+			maxY = std::max(maxY, v[1]);
+			minY = std::min(minY, v[1]);
+			maxZ = std::max(maxZ, v[2]);
+			minZ = std::min(minZ, v[2]);
 		}
 		else if (line.substr(0, 2) == "f ")
 		{
@@ -129,12 +127,26 @@ void load_obj(const char* filename, std::vector<std::vector<GLfloat>>& vertices,
 		}
 		/* anything else is ignored */
 	}
-	std::cout << "maxVal is:" << maxVal << std::endl;
+	
+	GLfloat xOffset = -(maxX + minX) / 2;
+	GLfloat yOffset = -(maxY + minY) / 2;
+	GLfloat zOffset = -(maxZ + minZ) / 2;
+	GLfloat xLen = (maxX - minX) / 2;
+	GLfloat yLen = (maxY - minY) / 2;
+	GLfloat zLen = (maxZ - minZ) / 2;
+	GLfloat scale = std::max(xLen, yLen);
+	scale = std::max(scale, zLen);
 	// normalize
 	for (auto& vertex : vertices) {
-		for (GLfloat& dim : vertex) {
-			dim /= maxVal;
-		}
+		// translate
+		vertex[0] += xOffset;
+		vertex[1] += yOffset;
+		vertex[2] += zOffset;
+		
+		// scale
+		vertex[0] /= scale;
+		vertex[1] /= scale;
+		vertex[2] /= scale;
 	}
 }
 

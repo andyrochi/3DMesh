@@ -4,6 +4,10 @@
 #include <iostream>
 #include <cstdio>
 #include <vector>
+#include <fstream>
+#include <string>
+#include <sstream>
+#include <algorithm>
 #define LEFT 1
 #define RIGHT 2
 
