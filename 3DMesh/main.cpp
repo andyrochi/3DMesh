@@ -17,33 +17,6 @@ std::vector<std::vector<GLushort>> DinoOrder;
 void load_obj(const char* filename, std::vector<std::vector<GLfloat>>& vertices, std::vector<std::vector<GLushort>>& elements);
 void draw_obj(std::vector<std::vector<GLfloat>>& vertices, std::vector<std::vector<GLushort>>& elements);
 
-void drawAxis() {
-	glPushMatrix();
-	glColor3f(1.0, 0, 0);
-	glBegin(GL_LINES);
-	glVertex3f(0.0, 0.0, 0.0);
-	glVertex3f(10.0, 0.0, 0.0);
-	glEnd();
-
-	glColor3f(0, 1.0, 0);
-	glBegin(GL_LINES);
-	glVertex3f(0.0, 0.0, 0.0);
-	glVertex3f(0.0, 10.0, 0.0);
-	glEnd();
-
-	glColor3f(0.0, 0, 1.0);
-	glBegin(GL_LINES);
-	glVertex3f(0.0, 0.0, 0.0);
-	glVertex3f(0.0, 0.0, 10.0);
-	glEnd();
-
-	glColor3f(1.0, 1.0, 0.0);
-	
-	glutWireCube(2.0);
-
-	glPopMatrix();
-}
-
 // Handles the keyboard event: the left and right arrows bend the elbow, the
 // up and down keys bend the shoulder.
 void special(int key, int, int) {
@@ -70,9 +43,10 @@ void display() {
 	glMatrixMode(GL_MODELVIEW);
 
 	glLoadIdentity();
-	/*gluLookAt(camera.getX(), camera.getY(), camera.getZ(),
+	floatvec up = camera.getCameraUp();
+	gluLookAt(camera.getX(), camera.getY(), camera.getZ(),
 		centerX, centerY, centerZ,
-		0.0, 1.0, 0.0);*/
+		up[0], up[1], up[2]);
 
 	draw_obj(vertices, DinoOrder);
 
@@ -88,7 +62,7 @@ void reshape(GLint w, GLint h) {
 	glViewport(0, 0, w, h);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	//gluPerspective(60.0, GLfloat(w) / GLfloat(h), 1.0, 30.0);
+	gluPerspective(60.0, GLfloat(w) / GLfloat(h), 0.1, 5.0);
 	glMatrixMode(GL_MODELVIEW);
 }
 
