@@ -42,7 +42,7 @@ void load_obj(const char* filename, std::vector<floatvec>& vertices, std::vector
 
 			// compute normal
 			floatvec vec1 = { vertices[b][0] - vertices[a][0], vertices[b][1] - vertices[a][1] , vertices[b][2] - vertices[a][2] };
-			floatvec vec2 = { vertices[c][0] - vertices[a][0], vertices[c][1] - vertices[c][1] , vertices[c][2] - vertices[a][2] };
+			floatvec vec2 = { vertices[c][0] - vertices[a][0], vertices[c][1] - vertices[a][1] , vertices[c][2] - vertices[a][2] };
 
 			floatvec normal = crossProduct(vec1, vec2);
 			normalize(normal);
