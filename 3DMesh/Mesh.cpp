@@ -76,8 +76,8 @@ void load_obj(const char* filename, std::vector<floatvec>& vertices, std::vector
 }
 
 void draw_obj(std::vector<floatvec>& vertices, std::vector<floatvec>& normals, std::vector<std::vector<GLushort>>& triangles) {
-	GLfloat ambient[] = { 0.2, 0.2, 0.2, 1.0 };
-	GLfloat diffuse[] = { 1.0, 0.8, 0.0, 1.0 };
+	GLfloat ambient[] = { 0.1, 0.1, 0.1, 1.0 };
+	GLfloat diffuse[] = { 154.0/255, 205.0/255, 50.0/255, 1.0 };
 	GLfloat specular[] = { 1.0, 1.0, 1.0, 1.0 };
 	GLfloat shine = 100.0;
 
