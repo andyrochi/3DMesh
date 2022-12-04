@@ -1,19 +1,25 @@
 #include "Utils.h"
 
 void drawAxis() {
+	GLfloat ambientX[] = { 1.0, 0.0, 0.0, 1.0 };
+	GLfloat ambientY[] = { 0.0, 1.0, 0.0, 1.0 };
+	GLfloat ambientZ[] = { 0.0, 0.0, 1.0, 1.0 };
 	glPushMatrix();
+	glMaterialfv(GL_FRONT, GL_AMBIENT, ambientX);
 	glColor3f(1.0, 0, 0);
 	glBegin(GL_LINES);
 	glVertex3f(0.0, 0.0, 0.0);
 	glVertex3f(10.0, 0.0, 0.0);
 	glEnd();
 
+	glMaterialfv(GL_FRONT, GL_AMBIENT, ambientY);
 	glColor3f(0, 1.0, 0);
 	glBegin(GL_LINES);
 	glVertex3f(0.0, 0.0, 0.0);
 	glVertex3f(0.0, 10.0, 0.0);
 	glEnd();
 
+	glMaterialfv(GL_FRONT, GL_AMBIENT, ambientZ);
 	glColor3f(0.0, 0, 1.0);
 	glBegin(GL_LINES);
 	glVertex3f(0.0, 0.0, 0.0);
