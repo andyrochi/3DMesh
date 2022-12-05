@@ -44,6 +44,15 @@ floatvec crossProduct(floatvec& a, floatvec& b) {
 	floatvec res = { x, y, z };
 	return res;
 }
+
+GLfloat dotProduct(floatvec& a, floatvec& b) {
+	if (a.size() < 3 || b.size() < 3) {
+		std::cerr << "input vector does not have dim of 3" << std::endl;
+		return 0;
+	}
+
+	return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+}
 void normalize(floatvec& vec) {
 	if (vec.size() < 3) {
 		std::cerr << "input vector does not have dim of 3" << std::endl;

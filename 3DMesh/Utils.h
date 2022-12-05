@@ -20,6 +20,7 @@ static GLfloat centerX = 0.0, centerY = 0.0, centerZ = 0.0;
 //const GLfloat eerieBlack[] = { 0.145, 0.141, 0.133 };
 void drawAxis();
 floatvec crossProduct(floatvec& a, floatvec& b);
+GLfloat dotProduct(floatvec& a, floatvec& b);
 void normalize(floatvec& vec);
 floatvec normalizedGet(floatvec& vec);
 #endif

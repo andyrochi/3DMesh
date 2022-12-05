@@ -18,21 +18,28 @@ public:
 	double getY() { return radius * sin(phi) * sin(theta); }
 	double getZ() { return radius * cos(phi); }
 	void moveRight() {
-
 		theta += dTheta;
 		if (theta >= TWO_PI) 
 			theta = 0;
 	}
 	void moveLeft() { theta -= dTheta; if (theta <= 0) theta = TWO_PI - dTheta; }
-	void moveUp() { phi -= dPhi; if (phi <= 0) phi = 0; }
+	void moveUp() { phi -= dPhi; if (phi <= 0.001) phi = 0.001; }
 	void moveDown() { phi += dPhi; if (phi >= M_PI) phi = M_PI; }
+
+	void rotate(double dTheta, double dPhi) {
+		theta += dTheta;
+		phi += dPhi;
+	}
+
 	floatvec getCameraUp() {
 		floatvec posVec = { float(getX()), float(getY()), float(getZ()) };
 		normalize(posVec);
 		floatvec worldUp = { 0.0f, 0.0f, 1.0f };
-
+		
 		floatvec left = crossProduct(posVec, worldUp);
+		normalize(left);
 		floatvec up = crossProduct(left, posVec);
+		normalize(up);
 		return up;
 	}
 };
