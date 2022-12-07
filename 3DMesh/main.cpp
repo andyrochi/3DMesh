@@ -47,8 +47,8 @@ void special(int key, int, int) {
 	switch (key) {
 	case GLUT_KEY_LEFT: camera.moveLeft(); break;
 	case GLUT_KEY_RIGHT: camera.moveRight(); break;
-	case GLUT_KEY_UP: camera.moveUp(); break;
-	case GLUT_KEY_DOWN: camera.moveDown(); break;
+	case GLUT_KEY_UP: camera.incRadius(); break;
+	case GLUT_KEY_DOWN: camera.decRadius(); break;
 	}
 	glutPostRedisplay();
 }
@@ -89,8 +89,16 @@ void mouseMove(int x, int y) {
 	}
 }
 
+void mouseWheel(int wheel, int direction, int x, int y)
+{
+	// Increment/decrement the global pointSize depending on the direction 
+	// of rotation of the mouse wheel.
+	(direction > 0) ? camera.decRadius() : camera.incRadius();
 
-void display() {
+	glutPostRedisplay();
+}
+
+void display() {  
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -117,7 +125,7 @@ void reshape(GLint w, GLint h) {
 	glViewport(0, 0, w, h);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(60.0, GLfloat(w) / GLfloat(h), 0.01, 5.0);
+	gluPerspective(60.0, GLfloat(w) / GLfloat(h), 0.01, 6.0);
 	glMatrixMode(GL_MODELVIEW);
 }
 
@@ -173,6 +181,7 @@ int main(int argc, char** argv) {
 	glutSpecialFunc(special);
 	glutMotionFunc(mouseMove);
 	glutMouseFunc(mouseFunc);
+	glutMouseWheelFunc(mouseWheel);
 	glutTimerFunc(0, refreshDisplay, 0);   // Refresh rate
 	glutTimerFunc(0, speedTick, 0);
 	init();

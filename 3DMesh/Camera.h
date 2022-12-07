@@ -27,6 +27,16 @@ public:
 	void moveLeft() { theta -= this->dTheta; if (theta <= 0) theta = TWO_PI - this->dTheta; }
 	void moveUp() { phi -= this->dPhi; if (phi <= 0.001) phi = 0.001; }
 	void moveDown() { phi += this->dPhi; if (phi >= M_PI) phi = M_PI; }
+	void incRadius() {
+		radius += 0.1;
+		if (radius >= 5)
+			radius = 5;
+	}
+	void decRadius() {
+		radius -= 0.1;
+		if (radius < 1)
+			radius = 1;
+	}
 
 	void rotate(double dThetaP, double dPhiP, bool drag = false) {
 		phi += dPhiP;
@@ -34,7 +44,7 @@ public:
 		if (phi < -TWO_PI) phi += TWO_PI;
 		theta += dThetaP * invertTheta;
 
-
+		// some hacks to fix gimbal lock
 		if (phi < 0 && !set) {
 			up[2] = -1;
 			set = true;
