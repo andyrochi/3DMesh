@@ -13,9 +13,9 @@ class Light {
 	floatvec specular;
 
 public:
-	Light() :theta(M_PI / 4), phi(M_PI / 4), radius(5.0), lightIndex(GL_LIGHT0)
+	Light() :theta(M_PI / 4), phi(M_PI / 4), radius(3.0), lightIndex(GL_LIGHT0)
 		, diffuse({ 1.0, 1.0, 1.0, 1.0 }), ambient({ 1.0, 1.0, 1.0, 1.0 }), specular({ 1.0, 1.0, 1.0, 1.0 }) {}
-	Light(GLenum index) :theta(M_PI / 4), phi(M_PI / 4), radius(5.0), lightIndex(index)
+	Light(GLenum index) :theta(M_PI / 4), phi(M_PI / 4), radius(3.0), lightIndex(index)
 		, diffuse({ 1.0, 1.0, 1.0, 1.0 }), ambient({ 1.0, 1.0, 1.0, 1.0 }), specular({ 1.0, 1.0, 1.0, 1.0 }) {}
 
 	double getX() { return radius * sin(phi) * cos(theta); }
@@ -37,6 +37,7 @@ public:
 	void rotate(double dThetaP, double dPhiP) {
 		phi += dPhiP;
 		theta += dThetaP;
+		glLightfv(lightIndex, GL_POSITION, getPos().data());
 	}
 
 	void setAmbient(floatvec amb) { ambient = amb; }

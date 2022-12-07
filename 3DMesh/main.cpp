@@ -13,6 +13,10 @@ std::vector<std::vector<GLushort>> DinoOrder;
 const int refreshMillis = 30;
 const int speedTickMillis = 100;
 
+enum RotateMode { CAMERA, LIGHTSRC };
+RotateMode rotateMode = CAMERA;
+
+
 struct vector2d {
 	double x, y;
 };
@@ -24,6 +28,7 @@ vector2d mouseSpeed = { 0, 0 };
 vector2d mouseCurPos = { 0, 0 };
 vector2d mousePrevPos = { 0, 0 };
 vector2d cameraSpeed = { 0, 0 };
+vector2d lightSpeed = { 0, 0 };
 
 // light
 Light lightSrc(GL_LIGHT0);
@@ -37,12 +42,20 @@ void updateMousePos() {
 		mouseSpeed.y = mouseCurPos.y - mousePrevPos.y;
 		mousePrevPos.x = mouseCurPos.x;
 		mousePrevPos.y = mouseCurPos.y;
-		cameraSpeed.x = mouseSpeed.x / ROTATEFACTOR;
-		cameraSpeed.y = mouseSpeed.y / ROTATEFACTOR;
+		if (rotateMode == CAMERA) {
+			cameraSpeed.x = mouseSpeed.x / ROTATEFACTOR;
+			cameraSpeed.y = mouseSpeed.y / ROTATEFACTOR;
+		}
+		else {
+			lightSpeed.x = mouseSpeed.x / ROTATEFACTOR;
+			lightSpeed.y = mouseSpeed.y / ROTATEFACTOR;
+		}
 	}
 	else {
 		cameraSpeed.x *= 0.8;
 		cameraSpeed.y *= 0.8;
+		lightSpeed.x *= 0;
+		lightSpeed.y *= 0;
 	}
 }
 
@@ -50,12 +63,19 @@ void updateMousePos() {
 // up and down keys bend the shoulder.
 void special(int key, int, int) {
 	switch (key) {
-	case GLUT_KEY_LEFT: lightSrc.rotate(-0.1, 0); break;
-	case GLUT_KEY_RIGHT: lightSrc.rotate(0.1, 0); break;
-	case GLUT_KEY_UP: lightSrc.rotate(0, -0.1); break;
-	case GLUT_KEY_DOWN: lightSrc.rotate(0, +0.1); break;
+	/*case GLUT_KEY_LEFT: lightSrc.rotate(-0.1, 0); break;
+	case GLUT_KEY_RIGHT: lightSrc.rotate(0.1, 0); break;*/
+	/*case GLUT_KEY_UP: lightSrc.incRadius(); break;
+	case GLUT_KEY_DOWN: lightSrc.decRadius(); break;*/
+	case GLUT_KEY_F1:
+		// rotate camera
+		rotateMode = CAMERA;
+		break;
+	case GLUT_KEY_F2:
+		// rotate light source
+		rotateMode = LIGHTSRC;
+		break;
 	}
-	glLightfv(GL_LIGHT0, GL_POSITION, lightSrc.getPos().data());
 	glutPostRedisplay();
 }
 
@@ -73,8 +93,14 @@ void mouseFunc(int button, int state, int x, int y) {
 			mousePrevPos.y = y;
 			mouseCurPos.x = x;
 			mouseCurPos.y = y;
-			cameraSpeed.x = 0;
-			cameraSpeed.y = 0;
+			if (rotateMode == CAMERA) {
+				cameraSpeed.x = 0;
+				cameraSpeed.y = 0;
+			}
+			else {
+				lightSpeed.x = 0;
+				lightSpeed.y = 0;
+			}
 		}
 		dragging = true;
 		
@@ -99,8 +125,11 @@ void mouseWheel(int wheel, int direction, int x, int y)
 {
 	// Increment/decrement the global pointSize depending on the direction 
 	// of rotation of the mouse wheel.
-	(direction > 0) ? camera.decRadius() : camera.incRadius();
-
+	if (rotateMode == CAMERA)
+		(direction > 0) ? camera.decRadius() : camera.incRadius();
+	else
+		(direction > 0) ? lightSrc.decRadius() : lightSrc.incRadius();
+	glLightfv(GL_LIGHT0, GL_POSITION, lightSrc.getPos().data());
 	glutPostRedisplay();
 }
 
@@ -109,17 +138,26 @@ void display() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glMatrixMode(GL_MODELVIEW);
-
 	glLoadIdentity();
+	/*glLightfv(GL_LIGHT0, GL_POSITION, lightSrc.getPos().data());*/
 	floatvec up = camera.getCameraUp();
 
 	gluLookAt(camera.getX(), camera.getY(), camera.getZ(),
 		centerX, centerY, centerZ,
 		up[0], up[1], up[2]);
-
 	draw_obj(vertices, normals, DinoOrder);
 
 	drawAxis();
+
+
+	glMaterialfv(GL_FRONT, GL_AMBIENT, lightSrc.getAmbientRaw());
+	//glMaterialfv(GL_FRONT, GL_DIFFUSE, lightSrc.getDiffuseRaw());
+	//glMaterialfv(GL_FRONT, GL_SPECULAR, lightSrc.getSpecularRaw());
+	//glMaterialfv(GL_FRONT, GL_EMISSION, lightSrc.getDiffuseRaw());
+	GLUquadric* quad;
+	quad = gluNewQuadric();
+	glTranslatef(lightSrc.getX(), lightSrc.getY(), lightSrc.getZ());
+	gluSphere(quad, 0.5, 100, 20);
 
 	glutSwapBuffers();
 }
@@ -131,13 +169,16 @@ void reshape(GLint w, GLint h) {
 	glViewport(0, 0, w, h);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gluPerspective(60.0, GLfloat(w) / GLfloat(h), 0.01, 6.0);
+	gluPerspective(60.0, GLfloat(w) / GLfloat(h), 0.01, 15.0);
 	glMatrixMode(GL_MODELVIEW);
 }
 
 /* Called back when the timer expired, used to rerender display */
 void refreshDisplay(int value) {
 	camera.rotate(-cameraSpeed.x, -cameraSpeed.y);
+	//glLightfv(GL_LIGHT0, GL_POSITION, lightSrc.getPos().data());
+	lightSrc.rotate(-lightSpeed.x, -lightSpeed.y);
+	/*glLightfv(GL_LIGHT0, GL_POSITION, lightSrc.getPos().data());*/
 	glutPostRedisplay();    // Post a paint request to activate display()
 	glutTimerFunc(refreshMillis, refreshDisplay, 0); // subsequent timer call at milliseconds
 }
@@ -160,7 +201,6 @@ void init() {
 	glLightfv(GL_LIGHT0, GL_AMBIENT, lightSrc.getAmbientRaw());
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, lightSrc.getDiffuseRaw());
 	glLightfv(GL_LIGHT0, GL_SPECULAR, lightSrc.getSpecularRaw());
-	printf("lightsrc: .%2f, .%2f, .%2f\n", lightSrc.getX(), lightSrc.getY(), lightSrc.getZ());
 
 	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.0);
 	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.01);
