@@ -147,7 +147,7 @@ void display() {
 		up[0], up[1], up[2]);
 	draw_obj(vertices, normals, DinoOrder);
 
-	drawAxis();
+	//drawAxis();
 
 
 	glMaterialfv(GL_FRONT, GL_AMBIENT, lightSrc.getAmbientRaw());
