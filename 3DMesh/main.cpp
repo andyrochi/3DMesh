@@ -1,6 +1,7 @@
 #include "Camera.h"
 #include "Utils.h"
 #include "Mesh.h"
+#include "Light.h"
 
 // Initialize camera
 Camera camera;
@@ -24,6 +25,10 @@ vector2d mouseCurPos = { 0, 0 };
 vector2d mousePrevPos = { 0, 0 };
 vector2d cameraSpeed = { 0, 0 };
 
+// light
+Light lightSrc(GL_LIGHT0);
+
+
 // call every speedTickMillis
 const int momentum = 0.1;
 void updateMousePos() {
@@ -45,11 +50,12 @@ void updateMousePos() {
 // up and down keys bend the shoulder.
 void special(int key, int, int) {
 	switch (key) {
-	case GLUT_KEY_LEFT: camera.moveLeft(); break;
-	case GLUT_KEY_RIGHT: camera.moveRight(); break;
-	case GLUT_KEY_UP: camera.incRadius(); break;
-	case GLUT_KEY_DOWN: camera.decRadius(); break;
+	case GLUT_KEY_LEFT: lightSrc.rotate(-0.1, 0); break;
+	case GLUT_KEY_RIGHT: lightSrc.rotate(0.1, 0); break;
+	case GLUT_KEY_UP: lightSrc.rotate(0, -0.1); break;
+	case GLUT_KEY_DOWN: lightSrc.rotate(0, +0.1); break;
 	}
+	glLightfv(GL_LIGHT0, GL_POSITION, lightSrc.getPos().data());
 	glutPostRedisplay();
 }
 
@@ -149,17 +155,12 @@ void init() {
 	glLoadIdentity();
 	load_obj("dino.obj", vertices, normals, DinoOrder);
 
-	// glPointLightSource
-	GLfloat diffuse0[] = { 1.0, 1.0, 1.0, 1.0 };
-	GLfloat ambient0[] = { 1.0, 1.0, 1.0, 1.0 };
-	GLfloat specular0[] = { 1.0, 1.0, 1.0, 1.0 };
-	GLfloat light0_pos[] = { 5.0, 5.0, 5.0, 1.0 };
-
 	glEnable(GL_LIGHT0);
-	glLightfv(GL_LIGHT0, GL_POSITION, light0_pos);
-	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient0);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse0);
-	glLightfv(GL_LIGHT0, GL_SPECULAR, specular0);
+	glLightfv(GL_LIGHT0, GL_POSITION, lightSrc.getPos().data());
+	glLightfv(GL_LIGHT0, GL_AMBIENT, lightSrc.getAmbientRaw());
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, lightSrc.getDiffuseRaw());
+	glLightfv(GL_LIGHT0, GL_SPECULAR, lightSrc.getSpecularRaw());
+	printf("lightsrc: .%2f, .%2f, .%2f\n", lightSrc.getX(), lightSrc.getY(), lightSrc.getZ());
 
 	glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.0);
 	glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 0.01);
