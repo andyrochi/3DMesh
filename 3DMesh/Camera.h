@@ -5,7 +5,7 @@
 // radius 10.  It moves vertically straight up and down.
 
 const double TWO_PI = 2 * M_PI;
-
+bool set = false;
 class Camera {
 	double theta;      // determines the x and z positions
 	double dTheta;     // increment in theta for swinging the camera around
@@ -13,8 +13,9 @@ class Camera {
 	double dPhi;
 	double radius;
 	floatvec up;
+	int invertTheta;
 public:
-	Camera() : theta(0), dTheta(0.04), phi(M_PI / 2), dPhi(0.04), radius(2.0), up({0.0,0.0, 1.0}) {}
+	Camera() : theta(0), dTheta(0.04), phi(M_PI / 2), dPhi(0.04), radius(2.0), up({0.0,0.0, 1.0}), invertTheta(1) {}
 	double getX() { return radius * sin(phi) * cos(theta); }
 	double getY() { return radius * sin(phi) * sin(theta); }
 	double getZ() { return radius * cos(phi); }
@@ -29,18 +30,50 @@ public:
 
 	void rotate(double dThetaP, double dPhiP, bool drag = false) {
 		phi += dPhiP;
-		theta += dThetaP;
+		if (phi >= TWO_PI) phi -= TWO_PI;
+		if (phi < -TWO_PI) phi += TWO_PI;
+		theta += dThetaP * invertTheta;
+
+
+		if (phi < 0 && !set) {
+			up[2] = -1;
+			set = true;
+				invertTheta = -1;
+		}
+		if (phi > 0 && phi < M_PI && set) {
+			up[2] = 1;
+			set = false;
+				invertTheta = 1;
+		}
+		if (phi > M_PI && !set) {
+			up[2] = -1;
+			set = true;
+				invertTheta = -1;
+		}
+		if (phi < M_PI && phi > 0 && set) {
+			up[2] = 1;
+			set = false;
+				invertTheta = 1;
+		}
+		if (phi < -M_PI && set) {
+			up[2] = 1;
+			set = false;
+				invertTheta = 1;
+		}
 	}
 
 	floatvec getCameraUp() {
 		floatvec posVec = { float(getX()), float(getY()), float(getZ()) };
+		
 		normalize(posVec);
+		
 		/*floatvec worldUp = { 0.0f, 0.0f, 1.0f };*/
 		
 		floatvec left = crossProduct(posVec, up);
 		normalize(left);
-		floatvec up = crossProduct(left, posVec);
-		normalize(up);
-		return up;
+		floatvec up2 = crossProduct(left, posVec);
+		normalize(up2);
+		
+		return up2;
 	}
 };
