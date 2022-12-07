@@ -26,10 +26,6 @@ void drawAxis() {
 	glVertex3f(0.0, 0.0, 10.0);
 	glEnd();
 
-	glColor3f(1.0, 1.0, 0.0);
-
-	glutWireCube(2.0);
-
 	glPopMatrix();
 }
 
